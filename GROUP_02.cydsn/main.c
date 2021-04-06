@@ -13,7 +13,7 @@ volatile uint8_t status = 0;
 const Color BLACK = {0, 0, 0};
 volatile Color color;
 
- static char message [20] = {'\0'};
+static char message [20] = {'\0'};
 
 int main(void)
 {
@@ -24,14 +24,23 @@ int main(void)
     RGBLed_Start();
     
     status = 0;
+    uint8_t max_value=5;
+
     
 	RGBLed_WriteColor(BLACK);
 
 	for (;;)
 	{
-	    if (data_received==1 && status==0){ 
+	    if (data_received==1 && status==IDLE){ 
             if (received==160){
                 status++;
+                data_received=0;
+            }
+            
+            else if (received==161){
+                //sprintf(message,"161 ricevuto/r/n");
+                //UART_RGB_PutString(message);
+                status=TIMER_CONFIG;
                 data_received=0;
             }
             
@@ -39,46 +48,62 @@ int main(void)
                 sprintf(message, "RGB LED Program $$$");
                 UART_RGB_PutString(message);
                 data_received=0;
-                status = 0;
+                status = IDLE;
             }
             else {
-                status=0;
+                status=IDLE;
                 data_received=0;
             }
         }
         
-        else if (data_received==1 && status==1){
+        else if (data_received==1 && status==HEADER){
             color.red = received;
             status++;
             data_received=0;
         }
         
-        else if (data_received==1 && status==2){
+        else if (data_received==1 && status==RED){
             color.green=received;
             status++;
             data_received=0;
         }
         
-        else if (data_received==1 && status==3){
+        else if (data_received==1 && status==GREEN){
             color.blu=received;
             status++;
             data_received=0;
         }
         
-        else if (data_received==1 && status==4){
+        else if (data_received==1 && status==BLU){
             if (received==192){
                 status++;
             }
             else {
-                status=0;
+                status=IDLE;
                 data_received=0;
             }
         }
         
-        else if (status==5){
+        else if (status==TAIL){
             RGBLed_WriteColor(color);
-            status=0;
+            status=IDLE;
             data_received=0;
+        }
+        else if (data_received==1 && status==TIMER_CONFIG){
+            max_value=received;
+            //sprintf(message, "%i/r/n", max_value);
+            //UART_RGB_PutString(message);
+            status++;
+            data_received=0;
+        }
+        else if (status==TIMER_ENDCONFIG && data_received==1){
+            if (received==192){
+                status=IDLE;
+                data_received=0;
+            }
+            else {
+                status =TIMER_ENDCONFIG;
+            }
         }
     }
 }

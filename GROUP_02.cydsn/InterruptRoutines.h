@@ -11,6 +11,8 @@
     #define GREEN 3
     #define BLU 4
     #define TAIL 5
+    #define TIMER_CONFIG 6
+    #define TIMER_ENDCONFIG 7
     
 #ifndef __INTERRUPT_ROUTINES_H__
     #define __INTERRUPT_ROUTINES_H__
