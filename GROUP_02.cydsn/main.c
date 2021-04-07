@@ -11,6 +11,7 @@
 #include "InterruptRoutines.h"
 #include "RGBLedDriver.h"
 #include "stdio.h"
+#include "TimerReset.h"
 
 /*Here we are going to add some variables, which are: 
  data_received: a flag which becomes 1 every time a data is received from the UART
@@ -55,10 +56,7 @@ int main(void)
             if (received == 160){
                 status++;
                 data_received = 0;
-                Timer_RGB_Stop();
-                Timer_RGB_WriteCounter(999);
-                count = 0;
-                Timer_RGB_Start();    
+                Reset_Timer();   
             } 
             //if received is equal to 160, then we pass in the HEADER state (1) and we lower the flag
             
@@ -96,10 +94,7 @@ int main(void)
                 //status is incremented
                 data_received = 0; 
                 //the flag is lowered
-                Timer_RGB_Stop();
-                Timer_RGB_WriteCounter(999);
-                count = 0;
-                Timer_RGB_Start();    
+                Reset_Timer();    
             }
         
             else if (data_received == 1 && status == RED){ 
@@ -110,10 +105,7 @@ int main(void)
                 //status is incremented
                 data_received = 0;
                 //the flag is lowered
-                Timer_RGB_Stop();
-                Timer_RGB_WriteCounter(999);
-                count = 0;
-                Timer_RGB_Start();
+                Reset_Timer();
             }
         
             else if (data_received == 1 && status == GREEN){ 
@@ -124,20 +116,14 @@ int main(void)
                 //status is incremented
                 data_received = 0; 
                 //the flag is lowered
-                Timer_RGB_Stop();
-                Timer_RGB_WriteCounter(999);
-                count = 0;
-                Timer_RGB_Start();
+                Reset_Timer();
             }
         
             else if (data_received == 1 && status == BLU){ 
                 //if a data is received and we are in the BLU state
                 if (received == 192){ 
                     status++;
-                    Timer_RGB_Stop();
-                    Timer_RGB_WriteCounter(999);
-                    count = 0;
-                    Timer_RGB_Start();
+                    Reset_Timer();
                 } 
                 //if received is equal to 192, then we increment the status passing in TAIL state
             }
@@ -147,21 +133,24 @@ int main(void)
             RGBLed_WriteColor(color);
             status = IDLE;
             data_received = 0;
-            Timer_RGB_Stop();
-            Timer_RGB_WriteCounter(999);
-            count = 0;
-            Timer_RGB_Start();
+            Reset_Timer();
         } 
         //if we are in the TAIL state, then we are ready to write the new color on the LED.
         
         else if (data_received == 1 && status == TIMER_CONFIG){ 
             //if a data is received and we are in the TIMER_CONFIGURATION state
-            max_value = received; 
-            //the received data represent the value of timeout in second
-            status++; 
-            //the status is increased in order to enter in the END_CONFIGURATION state
-            data_received = 0; 
-            //flag is lowered
+            if (received>=1 && received<=20){
+                max_value = received; 
+                //the received data represent the value of timeout in second
+                status++; 
+                //the status is increased in order to enter in the END_CONFIGURATION state
+                data_received = 0; 
+                //flag is lowered
+            }
+            else {
+                status= IDLE;
+            }
+                
         }
         
         else if (status == TIMER_ENDCONFIG && data_received == 1){ 
@@ -172,7 +161,7 @@ int main(void)
             } 
             //if the received data is 192, then timer configuration is ended and we return to IDLE state
             else {
-                status = TIMER_ENDCONFIG; 
+                status = IDLE; 
                 //if any other data is received, we have decided to remain the the END_CONFIGURATION state waiting for the value 192 to be received
             }
         }
