@@ -1,5 +1,9 @@
 /* ========================================
-Function to reset the Timer
+Function to reset the Timer.
+Authors: Francesca Artioli, Monica Loddo
+We created a timer reset function in order to make more sliding the main.c code.
+The function stops the timer, writes in the counter register the value 999, resets the count variable and starts again the timer.
+We chose to write in the counter register 999 to guarantee that the timer starts counting from the first value.
 */
 
 /* [] END OF FILE */

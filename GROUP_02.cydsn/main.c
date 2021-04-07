@@ -37,14 +37,14 @@ int main(void)
     UART_RGB_Start(); /*Start UART.*/
     isr_UART_StartEx(Custom_UART_RX_ISR); /*Initialization/startup code for UART isr.*/
     RGBLed_Start(); /*Start RGBLed.*/
-    Timer_RGB_Start();
-    isr_Timer_StartEx(Custom_TIMER_ISR);
+    Timer_RGB_Start(); /*Start Timer*/
+    isr_Timer_StartEx(Custom_TIMER_ISR); /*Initialization/startup code for TIMER isr.*/
     
     /*Initialize the variable status to 0 (IDLE state).*/
     status = 0;
     
-    /*Defining and initializing a variable max_value, which defines the seconds of timeout.*/
-    uint8_t max_value = 15;
+    /*Defining and initializing a variable max_value, which defines the seconds of timeout: default 5s*/
+    uint8_t max_value = 5;
 
     /*When the system is powered after programming, the LED is ON with color black.*/
 	RGBLed_WriteColor(BLACK);
@@ -52,13 +52,14 @@ int main(void)
 	for (;;)
 	{
 	    if (data_received == 1 && status == IDLE){ 
-            //if a data is received and we are in the IDLE state
+            //when we are in the IDLE stare and we receive a new data we have to check its value
             if (received == 160){
                 status++;
                 data_received = 0;
                 Reset_Timer();   
             } 
             //if received is equal to 160, then we pass in the HEADER state (1) and we lower the flag
+            
             
             else if (received == 161){
                 status = TIMER_CONFIG;
@@ -94,7 +95,10 @@ int main(void)
                 //status is incremented
                 data_received = 0; 
                 //the flag is lowered
-                Reset_Timer();    
+                Reset_Timer(); 
+                //We chose to reset the timer when a data is written in one of the RGB Led channels. 
+                //In this way the count variable contains the seconds that elapse between the reception of two consecutive data
+                //See the TimerReset.c for more information about the implementation of the function.
             }
         
             else if (data_received == 1 && status == RED){ 
@@ -120,7 +124,7 @@ int main(void)
             }
         
             else if (data_received == 1 && status == BLU){ 
-                //if a data is received and we are in the BLU state
+                //if a data is received and we are in the BLU state we have to check the value of received 
                 if (received == 192){ 
                     status++;
                     Reset_Timer();
@@ -130,16 +134,23 @@ int main(void)
         }
         
         if (status == TAIL){
+            // when we receive the entire sequence we can  switch on the RGB Led
             RGBLed_WriteColor(color);
+            // we come back to the Idle state
             status = IDLE;
+            //flag is lowered 
             data_received = 0;
+            //timer reset
             Reset_Timer();
         } 
         //if we are in the TAIL state, then we are ready to write the new color on the LED.
         
         else if (data_received == 1 && status == TIMER_CONFIG){ 
             //if a data is received and we are in the TIMER_CONFIGURATION state
+            //In this state the configuration of the new timeout condition is performed 
+            //We can set the new timeout only if the data coming from the UART are in the admissible range [1;20] 
             if (received>=1 && received<=20){
+                //new timeout condition
                 max_value = received; 
                 //the received data represent the value of timeout in second
                 status++; 
@@ -148,13 +159,14 @@ int main(void)
                 //flag is lowered
             }
             else {
+                //if the value is not admissible we chose to come back to the IDLE state
                 status= IDLE;
             }
                 
         }
         
         else if (status == TIMER_ENDCONFIG && data_received == 1){ 
-            //if a data is received and we are in the END_CONFIGURATION state
+            //if a data is received and we are in the END_CONFIGURATION state and it is necessary to send again 161 to proceed with the timeout configuration.
             if (received == 192){
                 status = IDLE;
                 data_received = 0;
@@ -162,7 +174,7 @@ int main(void)
             //if the received data is 192, then timer configuration is ended and we return to IDLE state
             else {
                 status = IDLE; 
-                //if any other data is received, we have decided to remain the the END_CONFIGURATION state waiting for the value 192 to be received
+                //if any other data is received, we have decided to come back to the IDLE state and it is necessary to send again 161 to proceed with the timeout configuration.
             }
         }
     }

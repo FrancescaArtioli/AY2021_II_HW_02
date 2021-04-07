@@ -1,11 +1,6 @@
 /* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
+  Header file to define the Reset Timer funcion
+  Authors: Francesca Artioli, Monica Loddo
  *
  * ========================================
 */
