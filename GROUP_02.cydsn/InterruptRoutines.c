@@ -1,7 +1,5 @@
-/* ========================================
-* InterrupRoutines.c
-* authors: Francesca Artioli, Monica Loddo
-* 
+/*
+* File InterrupRoutines.c
 */
 #include "InterruptRoutines.h"
 #include "project.h"
@@ -10,7 +8,7 @@
 // static char message [20] = {'\0'}; 
 
 /*UART ISR function: it is executed when a new data comes from the serial port.
-    The data is stored in the received variable and the flag data_received is set to 1 */
+  The data is stored in the received variable and the flag data_received is set to 1 */
 
 CY_ISR(Custom_UART_RX_ISR){
     if(UART_RGB_ReadRxStatus() == UART_RGB_RX_STS_FIFO_NOTEMPTY){ 
@@ -21,15 +19,14 @@ CY_ISR(Custom_UART_RX_ISR){
 }
 
 /*Timer ISR function: according to the settings of the top design this function is executed every second.
-   The count variable is updated when the isr is called, so it contains the number of seconds. */
+  The count variable is updated when the ISR is called, so it contains the number of seconds. */
 
 CY_ISR(Custom_TIMER_ISR){
     //Read timer status register and bring interrupt line low 
     Timer_RGB_ReadStatusRegister();
     count++;
     
-    //Print seconds (useful in the test code phase):
-    
+   //Print seconds (useful in the test code phase):
    // sprintf(message, "%i\r\n", count);
    // UART_RGB_PutString(message);
 }

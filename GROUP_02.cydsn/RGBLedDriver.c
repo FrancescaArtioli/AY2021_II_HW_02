@@ -1,6 +1,5 @@
-/* ========================================
- * \file RGBLedDriver.c 
- * ========================================
+/* 
+ * File RGBLedDriver.c 
 */
 #include "project.h"
 #include "RGBLedDriver.h"

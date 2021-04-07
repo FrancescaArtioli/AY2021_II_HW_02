@@ -1,6 +1,6 @@
-/* ========================================
- * \file RGBLedDriver.h
- * ========================================
+/* 
+ * File RGBLedDriver.h
+ * 
 */
 
 #ifndef __RGB_LED_DRIVER_H__
