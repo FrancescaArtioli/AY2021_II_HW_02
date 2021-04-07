@@ -19,7 +19,7 @@
 volatile uint8_t data_received=0;
 volatile uint8_t received = 0;
 volatile uint8_t status = 0;
-
+volatile uint8_t count = 0;
 
 /*Defining the balck color in RGB.*/
 const Color BLACK = {0, 0, 0};
@@ -36,12 +36,14 @@ int main(void)
     UART_RGB_Start(); /*Start UART.*/
     isr_UART_StartEx(Custom_UART_RX_ISR); /*Initialization/startup code for UART isr.*/
     RGBLed_Start(); /*Start RGBLed.*/
+    Timer_RGB_Start();
+    isr_Timer_StartEx(Custom_TIMER_ISR);
     
     /*Initialize the variable status to 0 (IDLE state).*/
     status = 0;
     
     /*Defining and initializing a variable max_value, which defines the seconds of timeout.*/
-    uint8_t max_value = 5;
+    uint8_t max_value = 15;
 
     /*When the system is powered after programming, the LED is ON with color black.*/
 	RGBLed_WriteColor(BLACK);
@@ -53,6 +55,10 @@ int main(void)
             if (received == 160){
                 status++;
                 data_received = 0;
+                Timer_RGB_Stop();
+                Timer_RGB_WriteCounter(999);
+                count = 0;
+                Timer_RGB_Start();    
             } 
             //if received is equal to 160, then we pass in the HEADER state (1) and we lower the flag
             
@@ -77,53 +83,74 @@ int main(void)
             //if received is any other value, then we remain in the IDLE state
         }
         
-        else if (data_received == 1 && status == HEADER){ 
-            //if a data is received and we are in the HEADER state
-            color.red = received; 
-            //the received data is stored in the type red of a struct holding colors
-            status++; 
-            //status is incremented
-            data_received = 0; 
-            //the flag is lowered
+        if (count == max_value){
+            status = IDLE;
         }
         
-        else if (data_received == 1 && status == RED){ 
-            //if a data is received and we are in the RED state
-            color.green = received; 
-            //the received data is stored in the type green of a struct holding colors
-            status++; 
-            //status is incremented
-            data_received = 0;
-            //the flag is lowered
-        }
+        else {
+            if (data_received == 1 && status == HEADER){ 
+                //if a data is received and we are in the HEADER state
+                color.red = received; 
+                //the received data is stored in the type red of a struct holding colors
+                status++; 
+                //status is incremented
+                data_received = 0; 
+                //the flag is lowered
+                Timer_RGB_Stop();
+                Timer_RGB_WriteCounter(999);
+                count = 0;
+                Timer_RGB_Start();    
+            }
         
-        else if (data_received == 1 && status == GREEN){ 
-            //if a data is received and we are in the GREEN state
-            color.blu = received; 
-            //the received data is stored in the type blu of a struct holding colors
-            status++; 
-            //status is incremented
-            data_received = 0; 
-            //the flag is lowered
-        }
-        
-        else if (data_received == 1 && status == BLU){ 
-            //if a data is received and we are in the BLU state
-            if (received == 192){ 
-                status++;
-            } 
-            //if received is equal to 192, then we increment the status passing in TAIL state
-            
-            else {
-                status = IDLE;
+            else if (data_received == 1 && status == RED){ 
+                //if a data is received and we are in the RED state
+                color.green = received; 
+                //the received data is stored in the type green of a struct holding colors
+                status++; 
+                //status is incremented
                 data_received = 0;
-            } 
+                //the flag is lowered
+                Timer_RGB_Stop();
+                Timer_RGB_WriteCounter(999);
+                count = 0;
+                Timer_RGB_Start();
+            }
+        
+            else if (data_received == 1 && status == GREEN){ 
+                //if a data is received and we are in the GREEN state
+                color.blu = received; 
+                //the received data is stored in the type blu of a struct holding colors
+                status++; 
+                //status is incremented
+                data_received = 0; 
+                //the flag is lowered
+                Timer_RGB_Stop();
+                Timer_RGB_WriteCounter(999);
+                count = 0;
+                Timer_RGB_Start();
+            }
+        
+            else if (data_received == 1 && status == BLU){ 
+                //if a data is received and we are in the BLU state
+                if (received == 192){ 
+                    status++;
+                    Timer_RGB_Stop();
+                    Timer_RGB_WriteCounter(999);
+                    count = 0;
+                    Timer_RGB_Start();
+                } 
+                //if received is equal to 192, then we increment the status passing in TAIL state
+            }
         }
         
-        else if (status == TAIL){
+        if (status == TAIL){
             RGBLed_WriteColor(color);
             status = IDLE;
             data_received = 0;
+            Timer_RGB_Stop();
+            Timer_RGB_WriteCounter(999);
+            count = 0;
+            Timer_RGB_Start();
         } 
         //if we are in the TAIL state, then we are ready to write the new color on the LED.
         
