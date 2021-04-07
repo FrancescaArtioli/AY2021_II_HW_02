@@ -1,9 +1,8 @@
-/* ========================================
- * \file InterruptRoutines.h
+/*
+ * File InterruptRoutines.h
  * Brief declaration of the two interrupt
  * function we need, one for UART and one
  * for the timer.
- * ========================================
 */
     #define IDLE 0
     #define HEADER 1
