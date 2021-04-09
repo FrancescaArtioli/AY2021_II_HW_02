@@ -58,12 +58,8 @@ int main(void)
 
 	for (;;)
 	{   
-        //IDLE STATE
-	    if (status == IDLE){ 
-        }
-        
         //TIMEOUT CONFIGURATION
-        else if (data_received == 1 && status == TIMER_CONFIG){ 
+        if (data_received == 1 && status == TIMER_CONFIG){ 
             //We can set the new timeout only if the data coming from the UART are in the admissible range [1-20].
             if (received >= 1 && received <= 20){
                 received_timeout_value = received; 

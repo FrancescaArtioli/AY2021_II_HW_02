@@ -1,7 +1,7 @@
 /*
  * File InterruptRoutines.h
  * Brief declaration of the two interrupt
- * function we need, one for UART and one
+ * functions we need, one for UART and one
  * for the timer.
 */
    
@@ -28,7 +28,7 @@
     //Here we are going to add some variables: 
     //data_received: a flag which becomes 1 every time a data is received from the UART
     //received: a variable containing the data read from the serial port
-    //status: containg the state in which we are (see the InterruptRoutines.h file)
+    //status: containg the current state
     //count: used to count seconds every time the Timer ISR is called
     volatile uint8_t data_received;
     volatile uint8_t status; 

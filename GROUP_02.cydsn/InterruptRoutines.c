@@ -1,5 +1,6 @@
 /* 
  * File InterruptRoutines.c
+ * For a better undertsanding of the ISR functions, see the code description in the main code.
 */
 
 #include "InterruptRoutines.h"
