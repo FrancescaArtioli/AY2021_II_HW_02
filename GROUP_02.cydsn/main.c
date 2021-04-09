@@ -15,7 +15,7 @@
  * when we are in the HEADER state we receive and store the RED byte, where we already are in the RED state
  * we receive and store the GREEN value and so on. 
  *
- * Authors: Francesce Artioli, Monica Loddo
+ * Authors: Monica Loddo, Francesca Artioli.
 */
 
 /*First we include all the header files, containg the declaration of the functions we need 
